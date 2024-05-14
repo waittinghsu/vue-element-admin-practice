@@ -1,0 +1,84 @@
+@import './functions';
+@import './color';
+
+// font
+$font-normal: to-rem(16px);
+
+$font-size: (
+  tiny: $font-normal * 0.625, // 10px
+  mini: $font-normal * 0.75, // 12px
+  small: $font-normal * 0.875, // 14px
+  normal: $font-normal, //16px
+  weight: $font-normal * 1.125, // 18px
+  big: $font-normal * 1.25, // 20px
+  large: $font-normal * 1.5, // 24px
+  x-large: $font-normal * 1.75, // 24px
+  display-1: $font-normal * 2.125, // 34px
+  display-2: $font-normal * 2.5, // 40px
+  display-3: $font-normal * 3, // 48px
+  display-4: $font-normal * 3.75, // 60px
+  display-5: $font-normal * 6, // 96px
+);
+
+// z-index
+$z-index: zero,
+base,
+fixed,
+modal;
+
+$border-radius-root: 4px !default;
+
+$rounded: () !default;
+$rounded: map-deep-merge(
+    (
+      0: 0,
+      'sm': $border-radius-root / 2,
+      null: $border-radius-root,
+      'lg': $border-radius-root * 2,
+      'xl': $border-radius-root * 6,
+      'pill': 9999px,
+      'circle': 50%
+    ),
+    $rounded
+);
+
+$border-size: () !default;
+$border-size: map-deep-merge(
+    (
+      0: 0,
+      'sm': $border-radius-root / 8 solid,
+      null: $border-radius-root / 4 solid,
+      'md': $border-radius-root / 2 solid,
+      'lg': $border-radius-root solid,
+      'xl': $border-radius-root * 5 solid
+    ),
+    $border-size
+);
+
+$sideBarWidth: 210px;
+
+$font-weights: (
+  'thin': 100,
+  'light': 300,
+  'regular': 400,
+  'medium': 500,
+  'normal': 600,
+  'bold': 700,
+  'black': 900
+);
+
+$spacer: 4px !default;
+
+$spacers: () !default;
+@if (type-of($spacers) == list) {
+  @for $i from 0 through 12 {
+    $spacers: map-merge($spacers, ($i: $spacer * $i))
+  }
+}
+
+$negative-spacers: () !default;
+@if (type-of($negative-spacers) == list) {
+  @for $i from 1 through 12 {
+    $negative-spacers: map-merge($negative-spacers, ("n" + $i: -$spacer * $i))
+  }
+}
