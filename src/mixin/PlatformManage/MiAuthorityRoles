@@ -1,0 +1,88 @@
+export default {
+  props: {
+    choices: {
+      type: Object,
+      default: () => ({
+        menu: [],
+        menus: [],
+        treeMenus: [],
+      }),
+    },
+    parentKey: {
+      type: String,
+      default: 'parent',
+    },
+  },
+  methods: {
+    /**
+     * el-tree 勾選事件
+     * @param checkNode 選擇的節點
+     * @param nodeObject 整棵樹的結構資料
+     * @return {boolean} 無回傳值
+     */
+    handleMenu(checkNode, nodeObject) {
+      if (this.type === 'CHECKUP') {
+        this.$message({ message: '只可查看，无法保存', type: 'info' });
+        return false;
+      }
+      // 加上”check-strictly”  勾選時用搜尋的方式自動加入子節點 （ 如果不使用 check-strictly 會因為子節點不完全造成父節點也不傳送
+      let allCheckedKeys = nodeObject.checkedKeys;// 當前所有被選去的節點
+      const isCheck = !!(allCheckedKeys.find((v) => v === checkNode.id));
+      const childKeys = this.getChildrenId(checkNode);// 取得德當前節點的所有子節點
+      const parentKeys = this.getParentId(checkNode[this.parentKey]);// 取得當前節點的所有父節點
+      // 是否被選取 則尋找子節點 自動加入checked
+      if (isCheck) {
+        // 將當選取前節點的'父' & '子' 節點 加入 allCheckedKeys 中
+        [...childKeys, ...parentKeys].forEach((itemKey) => {
+          allCheckedKeys.includes(itemKey) || allCheckedKeys.push(itemKey);// 如果不存在就 插入
+        });
+      } else { // 取消選取動作 將其餘子結點一併移除
+        // 對照如果 allCheckedKeys  有 childKeys 都移除;  (移除子checkbox
+        allCheckedKeys = allCheckedKeys.map((checkedKey) => (childKeys.includes(checkedKey) ? false : checkedKey)).filter(Boolean);
+      }
+      this.$refs.trMenu?.setCheckedKeys(allCheckedKeys);
+    },
+    /**
+     * 取得目標節點的 所有"子"結點數組 [1,2,3,4]
+     * @param { Object } node 節點物件
+     * @return {*[]}
+     */
+    getChildrenId(node) {
+      const arr = [];
+      if (node.children && node.children.length > 0) {
+        node.children.forEach((childrenNode) => {
+          arr.push(childrenNode.id, ...this.getChildrenId(childrenNode));
+        });
+      }
+      return arr;
+    },
+    /**
+     * 取得目標節點的 所有"父"結點數組 [1,2,3,4]
+     * @param {Number|String} id
+     * @return {*[]}
+     */
+    getParentId(id) {
+      if (!id) return [];
+      const temp = [];
+      const getItem = this.oneDimensionalMenus.find((o) => o.id === id);
+      if (getItem !== undefined && getItem[this.parentKey]) {
+        temp.push(getItem.id, ...this.getParentId(getItem[this.parentKey]));
+      } else {
+        getItem?.id && temp.push(getItem.id);
+      }
+      return temp;
+    },
+    /**
+     * 重組menu 成 tree格式 (props污染 有問題再改成 cloneDeep
+     * @param {Array} menu
+     * @param disabled
+     */
+    menuMaker(menu, disabled = true) {
+      menu.forEach((item) => {
+        item.label = item.name;
+        item.disabled = disabled;
+        (item.children && item.children.length > 0) && this.menuMaker(item.children, disabled);
+      });
+    },
+  },
+};
